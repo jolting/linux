@@ -1824,7 +1824,7 @@ static inline void cpu_probe_ingenic(struct cpuinfo_mips *c, unsigned int cpu)
 
 	/* XBurst®2 with MXU2.1 SIMD ISA */
 	case PRID_IMP_XBURST2:
-		c->cputype = CPU_XBURST;
+		c->cputype = CPU_XBURST2;
 		__cpu_name[cpu] = "Ingenic XBurst II";
 		break;
 
