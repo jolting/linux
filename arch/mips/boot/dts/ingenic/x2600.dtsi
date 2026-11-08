@@ -188,6 +188,32 @@
 		ingenic,reserved-channels = <0x3>;
 	};
 
+	msc0: mmc@13450000 {
+		compatible = "ingenic,x2600-dwcmshc";
+		reg = <0x13450000 0x10000>;
+
+		interrupt-parent = <&intc>;
+		interrupts = <37>;
+
+		clocks = <&cgu X2600_CLK_MSC0>;
+		clock-names = "core";
+
+		status = "disabled";
+	};
+
+	msc1: mmc@13460000 {
+		compatible = "ingenic,x2600-dwcmshc";
+		reg = <0x13460000 0x10000>;
+
+		interrupt-parent = <&intc>;
+		interrupts = <36>;
+
+		clocks = <&cgu X2600_CLK_MSC1>;
+		clock-names = "core";
+
+		status = "disabled";
+	};
+
 	uart0: serial@10030000 {
 		compatible = "ingenic,x2600-uart", "ingenic,x1000-uart";
 		reg = <0x10030000 0x100>;
