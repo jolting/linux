@@ -28,6 +28,51 @@
 unsigned long free_mem_ptr;
 unsigned long free_mem_end_ptr;
 
+#if (defined(CONFIG_CPU_MIPSR1) || defined(CONFIG_CPU_MIPSR2) ||	\
+	defined(CONFIG_CPU_MIPSR5) || defined(CONFIG_CPU_MIPSR6)) &&	\
+	!defined(CONFIG_CPU_CAVIUM_OCTEON)
+#define CONF_M		BIT(31)		/* Config1 is implemented */
+
+/* Index operations over a whole L1 cache, its geometry from Config1 */
+#define CACHE_BLAST(op, sets_shift, line_shift, ways_shift)		\
+do {									\
+	unsigned int line = (config1 >> (line_shift)) & 7;		\
+	unsigned long addr, end;					\
+									\
+	if (line) {							\
+		line = 2 << line;					\
+		end = CKSEG0 + (64 << ((config1 >> (sets_shift)) & 7)) *	\
+		      line * (((config1 >> (ways_shift)) & 7) + 1);	\
+		for (addr = CKSEG0; addr < end; addr += line)		\
+			__asm__ __volatile__("cache %0, 0(%1)"		\
+					     : : "i" (op), "r" (addr));	\
+	}								\
+} while (0)
+
+/*
+ * The kernel was just written through the data cache, and the instruction
+ * cache may hold whatever code was at its addresses before, from a boot
+ * loader or a previous kernel. Write back the L1 data cache and invalidate
+ * the L1 instruction cache so that the kernel runs the code just written.
+ */
+static void flush_l1_caches(void)
+{
+	unsigned int config, config1;
+
+	__asm__ __volatile__("mfc0 %0, $16, 0" : "=r" (config));
+	if (!(config & CONF_M))
+		return;
+	__asm__ __volatile__("mfc0 %0, $16, 1" : "=r" (config1));
+
+	CACHE_BLAST(0x01, 13, 10, 7);	/* Index_Writeback_Inv_D */
+	__asm__ __volatile__("sync" : : : "memory");
+	CACHE_BLAST(0x00, 22, 19, 16);	/* Index_Invalidate_I */
+	__asm__ __volatile__("ehb" : : : "memory");
+}
+#else
+static inline void flush_l1_caches(void) { }
+#endif
+
 void error(char *x)
 {
 	puts("\n\n");
@@ -124,6 +169,6 @@ void decompress_kernel(unsigned long boot_heap_start)
 		       __appended_dtb, dtb_size);
 	}
 
-	/* FIXME: should we flush cache here? */
+	flush_l1_caches();
 	puts("Now, booting the kernel...\n");
 }
