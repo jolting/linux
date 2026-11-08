@@ -809,6 +809,7 @@
 #define MIPS_CONF4_AE		(_ULCAST_(1) << 28)
 #define MIPS_CONF4_IE		(_ULCAST_(3) << 29)
 #define MIPS_CONF4_TLBINV	(_ULCAST_(2) << 29)
+#define MIPS_CONF4_TLBINV_MMU	(_ULCAST_(3) << 29)
 
 #define MIPS_CONF5_NF		(_ULCAST_(1) << 0)
 #define MIPS_CONF5_UFR		(_ULCAST_(1) << 2)

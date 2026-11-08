@@ -80,6 +80,9 @@
 #ifndef cpu_has_tlbinv
 #define cpu_has_tlbinv		__opt(MIPS_CPU_TLBINV)
 #endif
+#ifndef cpu_has_tlbinv_mmu
+#define cpu_has_tlbinv_mmu	__opt(MIPS_CPU_TLBINV_MMU)
+#endif
 #ifndef cpu_has_segments
 #define cpu_has_segments	__opt(MIPS_CPU_SEGMENTS)
 #endif
