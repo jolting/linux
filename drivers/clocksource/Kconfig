@@ -729,6 +729,17 @@ config INGENIC_SYSOST
 	help
 	  Support for the SYSOST of the Ingenic X Series SoCs.
 
+config INGENIC_X2600_OST
+	bool "Clocksource/timer using the OST in the Ingenic X2600"
+	depends on MIPS || COMPILE_TEST
+	depends on COMMON_CLK
+	select TIMER_OF
+	help
+	  Support for the operating system timer of the Ingenic X2600: the
+	  64-bit global counter as clocksource and sched_clock, and the
+	  per-core compare timers as clock event devices. The X2600 has no
+	  other usable system timer, so say Y when building for it.
+
 config INGENIC_OST
 	bool "Clocksource using the OST in Ingenic JZ SoCs"
 	depends on MIPS || COMPILE_TEST

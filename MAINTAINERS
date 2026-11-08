@@ -12874,6 +12874,13 @@ F:	include/linux/mfd/ingenic-tcu.h
 F:	sound/soc/codecs/jz47*
 F:	sound/soc/jz4740/
 
+INGENIC X2600 OST DRIVER
+M:	Hunter Laux <hunterlaux@gmail.com>
+L:	linux-mips@vger.kernel.org
+S:	Maintained
+F:	Documentation/devicetree/bindings/timer/ingenic,x2600-ost.yaml
+F:	drivers/clocksource/ingenic-x2600-ost.c
+
 INJOINIC IP5xxx POWER BANK IC DRIVER
 M:	Samuel Holland <samuel@sholland.org>
 S:	Maintained
