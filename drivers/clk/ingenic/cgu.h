@@ -79,11 +79,15 @@ struct ingenic_cgu_pll_info {
  * @shift: number of bits to shift the mux value by (ie. the index of
  *         the lowest bit of the mux value within its control register)
  * @bits: the size of the mux value in bits
+ * @by_rate: on a rate change, switch to the parent giving the highest rate
+ *           not above the requested one (for a clock that also divides);
+ *           unless the mux is glitch-free, only while the clock is gated
  */
 struct ingenic_cgu_mux_info {
 	unsigned reg;
 	u8 shift;
 	u8 bits;
+	bool by_rate;
 };
 
 /**
