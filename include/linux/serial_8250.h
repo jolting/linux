@@ -175,6 +175,12 @@ struct uart_8250_port {
 	struct uart_8250_em485 *em485;
 	void			(*rs485_start_tx)(struct uart_8250_port *up, bool toggle_ier);
 	void			(*rs485_stop_tx)(struct uart_8250_port *up, bool toggle_ier);
+	/*
+	 * Optional: the bytes waiting in the TX FIFO, for UARTs whose LSR.THRE
+	 * is set before the FIFO is empty. Used to time the end of an RS-485
+	 * transmission.
+	 */
+	unsigned int		(*tx_fifo_count)(struct uart_8250_port *up);
 
 	/* Serial port overrun backoff */
 	struct delayed_work overrun_backoff;

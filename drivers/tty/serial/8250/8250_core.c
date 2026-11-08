@@ -790,6 +790,7 @@ int serial8250_register_8250_port(const struct uart_8250_port *up)
 	uart->port.rs485	= up->port.rs485;
 	uart->rs485_start_tx	= up->rs485_start_tx;
 	uart->rs485_stop_tx	= up->rs485_stop_tx;
+	uart->tx_fifo_count	= up->tx_fifo_count;
 	uart->lsr_save_mask	= up->lsr_save_mask;
 	uart->dma		= up->dma;
 

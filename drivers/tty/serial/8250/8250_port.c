@@ -1412,6 +1412,9 @@ static inline void __stop_tx(struct uart_8250_port *p)
 			 * Roughly estimate 1 extra bit here with / 7.
 			 */
 			stop_delay = p->port.frame_time + DIV_ROUND_UP(p->port.frame_time, 7);
+			/* Frames still in the FIFO where THRE is set early */
+			if (p->tx_fifo_count)
+				stop_delay += (u64)p->port.frame_time * p->tx_fifo_count(p);
 		}
 
 		__stop_tx_rs485(p, stop_delay);
