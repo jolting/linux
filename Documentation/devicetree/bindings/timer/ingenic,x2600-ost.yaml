@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/timer/ingenic,x2600-ost.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Ingenic X2600 operating system timer (OST)
+
+maintainers:
+  - Hunter Laux <hunterlaux@gmail.com>
+
+description:
+  The OST of the Ingenic X2600 has a global part, one 64-bit counter shared
+  by all cores, and a core part, one 32-bit compare timer per core in banks
+  of 0x100 bytes. The core timers interrupt their own core directly, on CPU
+  interrupt line 4.
+
+properties:
+  compatible:
+    const: ingenic,x2600-ost
+
+  reg:
+    items:
+      - description: Global OST, the 64-bit counter
+      - description: Core OST, one 0x100-byte bank per core
+
+  reg-names:
+    items:
+      - const: global
+      - const: core
+
+  clocks:
+    maxItems: 1
+
+  clock-names:
+    const: ost
+
+  interrupts:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+  - reg-names
+  - clocks
+  - clock-names
+  - interrupts
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/clock/ingenic,x2600-cgu.h>
+
+    timer@12000000 {
+        compatible = "ingenic,x2600-ost";
+        reg = <0x12000000 0x18>, <0x12100000 0x200>;
+        reg-names = "global", "core";
+
+        clocks = <&cgu X2600_CLK_OST>;
+        clock-names = "ost";
+
+        interrupt-parent = <&cpuintc>;
+        interrupts = <4>;
+    };
+...
