@@ -75,19 +75,21 @@ void local_flush_tlb_all(void)
 	 * If there are any wired entries, fall back to iterating
 	 */
 	if (cpu_has_tlbinv && !entry) {
-		if (current_cpu_data.tlbsizevtlb) {
+		if (current_cpu_data.tlbsizevtlb || cpu_has_tlbinv_mmu) {
 			write_c0_index(0);
 			mtc0_tlbw_hazard();
-			tlbinvf();  /* invalidate VTLB */
+			tlbinvf();  /* invalidate VTLB (or the whole MMU) */
 		}
-		ftlbhighset = current_cpu_data.tlbsizevtlb +
-			current_cpu_data.tlbsizeftlbsets;
-		for (entry = current_cpu_data.tlbsizevtlb;
-		     entry < ftlbhighset;
-		     entry++) {
-			write_c0_index(entry);
-			mtc0_tlbw_hazard();
-			tlbinvf();  /* invalidate one FTLB set */
+		if (!cpu_has_tlbinv_mmu) {
+			ftlbhighset = current_cpu_data.tlbsizevtlb +
+				current_cpu_data.tlbsizeftlbsets;
+			for (entry = current_cpu_data.tlbsizevtlb;
+			     entry < ftlbhighset;
+			     entry++) {
+				write_c0_index(entry);
+				mtc0_tlbw_hazard();
+				tlbinvf();  /* invalidate one FTLB set */
+			}
 		}
 	} else {
 		while (entry < current_cpu_data.tlbsize) {

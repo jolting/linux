@@ -569,8 +569,14 @@ static inline unsigned int decode_config4(struct cpuinfo_mips *c)
 	config4 = read_c0_config4();
 
 	if (cpu_has_tlb) {
-		if (((config4 & MIPS_CONF4_IE) >> 29) == 2)
+		switch (config4 & MIPS_CONF4_IE) {
+		case MIPS_CONF4_TLBINV_MMU:
+			c->options |= MIPS_CPU_TLBINV_MMU;
+			fallthrough;
+		case MIPS_CONF4_TLBINV:
 			c->options |= MIPS_CPU_TLBINV;
+			break;
+		}
 
 		/*
 		 * R6 has dropped the MMUExtDef field from config4.
