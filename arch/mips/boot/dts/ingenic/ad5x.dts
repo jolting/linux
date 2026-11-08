@@ -9,6 +9,7 @@
 	model = "Flashforge Adventurer 5X";
 
 	aliases {
+		mmc0 = &msc0;
 		serial0 = &uart0;
 		serial2 = &uart2;
 		serial4 = &uart4;
@@ -48,7 +49,26 @@
 	clock-frequency = <24000000>;
 };
 
+/* eMMC */
+&msc0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pins_mmc0>;
+
+	bus-width = <8>;
+	max-frequency = <150000000>;
+	non-removable;
+	no-sd;
+	no-sdio;
+
+	status = "okay";
+};
+
 &pinctrl {
+	pins_mmc0: mmc0 {
+		function = "mmc0";
+		groups = "mmc0-4bit", "mmc0-8bit";
+	};
+
 	pins_uart0: uart0 {
 		function = "uart0";
 		groups = "uart0-e";
