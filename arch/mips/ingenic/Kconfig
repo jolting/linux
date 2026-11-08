@@ -9,6 +9,7 @@ config MACH_INGENIC_GENERIC
 	select MACH_JZ4780
 	select MACH_X1000
 	select MACH_X1830
+	select MACH_X2600
 
 choice
 	prompt "Machine type"
@@ -43,6 +44,14 @@ config X1830_CU1830_NEO
 	bool "YSH & ATIL CU1830 Module with Neo backplane"
 	select MACH_X1830
 
+config X2600_FLASHFORGE_AD5X
+	bool "Flashforge Adventurer 5X"
+	select MACH_X2600
+	help
+	  Support for the Flashforge Adventurer 5X 3D printer, whose main
+	  board uses the Ingenic X2600 SoC. Selecting it builds the
+	  printer's device tree into the kernel.
+
 endchoice
 
 config MACH_JZ4725B
@@ -72,6 +81,12 @@ config MACH_X1000
 	select SYS_SUPPORTS_HIGHMEM
 
 config MACH_X1830
+	bool
+	select MIPS_CPU_SCACHE
+	select SYS_HAS_CPU_MIPS32_R2
+	select SYS_SUPPORTS_HIGHMEM
+
+config MACH_X2600
 	bool
 	select MIPS_CPU_SCACHE
 	select SYS_HAS_CPU_MIPS32_R2
