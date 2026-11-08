@@ -2257,6 +2257,70 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_hpe_gsc_pdata = {
 	.init = dwcmshc_hpe_gsc_init,
 };
 
+/*
+ * As on Rockchip, the SDCLK frequency select bits of the X2600 MSHC have no
+ * effect: the card clock is the core clock from the CGU, which divides and
+ * picks its own parent (EXCLK below 1.7 MHz, for card identification).
+ */
+static void dwcmshc_x2600_set_clock(struct sdhci_host *host, unsigned int clock)
+{
+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+	int err;
+
+	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+	host->mmc->actual_clock = 0;
+
+	if (!clock)
+		return;
+
+	/*
+	 * The CGU switches the clock's parent only while it is gated; the
+	 * card clock is off and no command is in flight here.
+	 */
+	clk_disable_unprepare(pltfm_host->clk);
+	err = clk_set_rate(pltfm_host->clk, clock);
+	if (err)
+		dev_err(mmc_dev(host->mmc), "failed to set clock %u Hz: %d\n",
+			clock, err);
+	if (clk_prepare_enable(pltfm_host->clk)) {
+		dev_err(mmc_dev(host->mmc), "failed to enable the core clock\n");
+		return;
+	}
+	if (err)
+		return;
+
+	host->mmc->actual_clock = clk_get_rate(pltfm_host->clk);
+	sdhci_enable_clk(host, 0);
+}
+
+static unsigned int dwcmshc_x2600_get_min_clock(struct sdhci_host *host)
+{
+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+
+	return clk_round_rate(pltfm_host->clk, 1);
+}
+
+static const struct sdhci_ops sdhci_dwcmshc_x2600_ops = {
+	.set_clock		= dwcmshc_x2600_set_clock,
+	.set_bus_width		= sdhci_set_bus_width,
+	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
+	.get_max_clock		= rk35xx_get_max_clock,
+	.get_min_clock		= dwcmshc_x2600_get_min_clock,
+	.reset			= dwcmshc_reset,
+	.adma_write_desc	= dwcmshc_adma_write_desc,
+};
+
+static const struct dwcmshc_pltfm_data sdhci_dwcmshc_x2600_pdata = {
+	.pdata = {
+		.ops = &sdhci_dwcmshc_x2600_ops,
+		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+			  SDHCI_QUIRK_NO_HISPD_BIT |
+			  SDHCI_QUIRK_32BIT_DMA_ADDR |
+			  SDHCI_QUIRK_32BIT_DMA_SIZE,
+		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+	},
+};
+
 static const struct cqhci_host_ops dwcmshc_cqhci_ops = {
 	.enable		= dwcmshc_sdhci_cqe_enable,
 	.disable	= sdhci_cqe_disable,
@@ -2376,6 +2440,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
 	{
 		.compatible = "hpe,gsc-dwcmshc",
 		.data = &sdhci_dwcmshc_hpe_gsc_pdata,
+	},
+	{
+		.compatible = "ingenic,x2600-dwcmshc",
+		.data = &sdhci_dwcmshc_x2600_pdata,
 	},
 	{},
 };
