@@ -27,11 +27,13 @@
  * @tx_loadsz: transmit FIFO load size
  * @fifosize: FIFO size
  * @fractional: whether the baud rate uses the UMR and UACR registers
+ * @tx_fifo_count: whether the TCR register counts the bytes in the TX FIFO
  */
 struct ingenic_uart_config {
 	int tx_loadsz;
 	int fifosize;
 	bool fractional;
+	bool tx_fifo_count;
 };
 
 struct ingenic_uart_data {
@@ -59,6 +61,9 @@ static const struct of_device_id of_match[];
 #define UART_UMR_MAX	31
 #define UART_UMR_DEFAULT	16
 #define UART_UACR_BITS	12
+
+/* The bytes waiting in the TX FIFO */
+#define INGENIC_UART_TCR	17
 
 /* The fractional part passed from get_divisor() to set_divisor() */
 #define INGENIC_FRAC_UMR_SHIFT	16
@@ -319,6 +324,15 @@ static void ingenic_uart_set_divisor(struct uart_port *port, unsigned int baud,
 	       port->membase + (UART_UACR << port->regshift));
 }
 
+/*
+ * LSR.THRE means the TX FIFO is half empty or less, not empty: give the
+ * 8250 core the FIFO level to time the end of an RS-485 transmission.
+ */
+static unsigned int ingenic_uart_tx_fifo_count(struct uart_8250_port *up)
+{
+	return up->port.serial_in(&up->port, INGENIC_UART_TCR);
+}
+
 static void ingenic_uart_serial_out(struct uart_port *p, unsigned int offset, u32 value)
 {
 	u32 ier;
@@ -429,6 +443,8 @@ static int ingenic_uart_probe(struct platform_device *pdev)
 		uart.port.get_divisor = ingenic_uart_get_divisor;
 		uart.port.set_divisor = ingenic_uart_set_divisor;
 	}
+	if (cdata->tx_fifo_count)
+		uart.tx_fifo_count = ingenic_uart_tx_fifo_count;
 
 	uart.port.membase = devm_ioremap(&pdev->dev, regs->start,
 					 resource_size(regs));
@@ -508,6 +524,7 @@ static const struct ingenic_uart_config x2600_uart_config = {
 	.tx_loadsz = 32,
 	.fifosize = 64,
 	.fractional = true,
+	.tx_fifo_count = true,
 };
 
 static const struct of_device_id of_match[] = {
