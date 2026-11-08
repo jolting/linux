@@ -10,7 +10,9 @@
 
 	aliases {
 		serial0 = &uart0;
+		serial2 = &uart2;
 		serial4 = &uart4;
+		serial5 = &uart5;
 	};
 
 	chosen {
@@ -52,9 +54,19 @@
 		groups = "uart0-e";
 	};
 
+	pins_uart2: uart2 {
+		function = "uart2";
+		groups = "uart2-data";
+	};
+
 	pins_uart4: uart4 {
 		function = "uart4";
 		groups = "uart4-data-b";
+	};
+
+	pins_uart5: uart5 {
+		function = "uart5";
+		groups = "uart5-data-b";
 	};
 };
 
@@ -62,6 +74,14 @@
 &uart0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pins_uart0>;
+
+	status = "okay";
+};
+
+/* Motion controller (Klipper MCU) */
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pins_uart2>;
 
 	status = "okay";
 };
@@ -79,6 +99,14 @@
 	rts-gpios = <&gpc 3 GPIO_ACTIVE_HIGH>;
 	linux,rs485-enabled-at-boot-time;
 	rs485-rx-during-tx;
+
+	status = "okay";
+};
+
+/* Toolhead board (eboard, Klipper MCU) */
+&uart5 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pins_uart5>;
 
 	status = "okay";
 };
