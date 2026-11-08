@@ -53,6 +53,11 @@ properties:
           - const: yna,cu2000-neo
           - const: ingenic,x2000e
 
+      - description: Flashforge Adventurer 5X 3D printer
+        items:
+          - const: flashforge,ad5x
+          - const: ingenic,x2600
+
 additionalProperties: true
 
 ...
