@@ -411,7 +411,12 @@ static int ingenic_uart_probe(struct platform_device *pdev)
 	uart.port.serial_in = ingenic_uart_serial_in;
 	uart.port.dev = &pdev->dev;
 	uart.tx_loadsz = cdata->tx_loadsz;
-	uart.capabilities = UART_CAP_FIFO | UART_CAP_RTOIE;
+	/* No interrupt when the transmitter is empty, only the FIFO (THRE) */
+	uart.capabilities = UART_CAP_FIFO | UART_CAP_RTOIE | UART_CAP_NOTEMT;
+	uart.port.rs485_config = serial8250_em485_config;
+	uart.port.rs485_supported = serial8250_em485_supported;
+	uart.rs485_start_tx = serial8250_em485_start_tx;
+	uart.rs485_stop_tx = serial8250_em485_stop_tx;
 
 	err = uart_read_port_properties(&uart.port);
 	if (err)
