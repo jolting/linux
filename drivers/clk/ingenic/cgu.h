@@ -39,6 +39,11 @@
  * @od_encoding: a pointer to an array mapping post-VCO divider values to
  *               their encoded values in the PLL control register, or -1 for
  *               unsupported values
+ * @od2_shift: the index of the lowest bit of a second post-VCO divider, in
+ *             series with the first one and holding the divider value itself
+ * @od2_bits: the size of the second post-VCO divider field in bits, or 0 if
+ *	      there is no such field. The PLL rate is set with this divider
+ *	      at 1.
  * @bypass_reg: the offset of the bypass control register within the CGU
  * @bypass_bit: the index of the bypass bit in the PLL control register, or
  *              -1 if there is no bypass bit
@@ -56,6 +61,7 @@ struct ingenic_cgu_pll_info {
 	u8 m_shift, m_bits, m_offset;
 	u8 n_shift, n_bits, n_offset;
 	u8 od_shift, od_bits, od_max;
+	u8 od2_shift, od2_bits;
 	unsigned bypass_reg;
 	s8 bypass_bit;
 	s8 enable_bit;
