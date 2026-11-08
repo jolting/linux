@@ -610,6 +610,8 @@ patternProperties:
     description: Firefly
   "^fitipower,.*":
     description: Fitipower Integrated Technology Inc.
+  "^flashforge,.*":
+    description: Zhejiang Flashforge 3D Technology Co., Ltd.
   "^flipkart,.*":
     description: Flipkart Inc.
   "^focaltech,.*":
