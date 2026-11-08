@@ -472,14 +472,11 @@ ingenic_clk_calc_hw_div(const struct ingenic_cgu_clk_info *clk_info,
 }
 
 static unsigned
-ingenic_clk_calc_div(struct clk_hw *hw,
-		     const struct ingenic_cgu_clk_info *clk_info,
+ingenic_clk_calc_div(const struct ingenic_cgu_clk_info *clk_info, u8 parent,
 		     unsigned long parent_rate, unsigned long req_rate)
 {
 	unsigned int div, hw_div;
-	u8 parent;
 
-	parent = ingenic_clk_get_parent(hw);
 	if (clk_info->div.bypass_mask & BIT(parent))
 		return 1;
 
@@ -507,6 +504,58 @@ ingenic_clk_calc_div(struct clk_hw *hw,
 	return div;
 }
 
+/*
+ * Pick the parent and divider giving the highest rate not above the
+ * request, or the lowest rate any parent can give if all are above it.
+ */
+static int
+ingenic_clk_determine_rate_by_parent(struct clk_hw *hw,
+				     const struct ingenic_cgu_clk_info *clk_info,
+				     struct clk_rate_request *req)
+{
+	unsigned long parent_rate, rate, best_rate = 0, low_rate = ULONG_MAX;
+	struct clk_hw *parent, *best = NULL, *low = NULL;
+	unsigned long best_parent_rate = 0, low_parent_rate = 0;
+	unsigned int i, div;
+
+	for (i = 0; i < clk_hw_get_num_parents(hw); i++) {
+		parent = clk_hw_get_parent_by_index(hw, i);
+		if (!parent)
+			continue;
+
+		parent_rate = clk_hw_get_rate(parent);
+		if (!parent_rate)
+			continue;
+
+		div = ingenic_clk_calc_div(clk_info, i, parent_rate, req->rate);
+		rate = DIV_ROUND_UP(parent_rate, div);
+
+		if (rate <= req->rate && rate > best_rate) {
+			best = parent;
+			best_rate = rate;
+			best_parent_rate = parent_rate;
+		}
+		if (rate < low_rate) {
+			low = parent;
+			low_rate = rate;
+			low_parent_rate = parent_rate;
+		}
+	}
+
+	if (!best) {
+		if (!low)
+			return -EINVAL;
+		best = low;
+		best_rate = low_rate;
+		best_parent_rate = low_parent_rate;
+	}
+
+	req->best_parent_hw = best;
+	req->best_parent_rate = best_parent_rate;
+	req->rate = best_rate;
+	return 0;
+}
+
 static int ingenic_clk_determine_rate(struct clk_hw *hw,
 				      struct clk_rate_request *req)
 {
@@ -514,9 +563,14 @@ static int ingenic_clk_determine_rate(struct clk_hw *hw,
 	const struct ingenic_cgu_clk_info *clk_info = to_clk_info(ingenic_clk);
 	unsigned int div = 1;
 
+	if ((clk_info->type & CGU_CLK_MUX) && (clk_info->type & CGU_CLK_DIV) &&
+	    clk_info->mux.by_rate &&
+	    !(clk_hw_get_flags(hw) & CLK_SET_RATE_NO_REPARENT))
+		return ingenic_clk_determine_rate_by_parent(hw, clk_info, req);
+
 	if (clk_info->type & CGU_CLK_DIV)
-		div = ingenic_clk_calc_div(hw, clk_info, req->best_parent_rate,
-					   req->rate);
+		div = ingenic_clk_calc_div(clk_info, ingenic_clk_get_parent(hw),
+					   req->best_parent_rate, req->rate);
 	else if (clk_info->type & CGU_CLK_FIXDIV)
 		div = clk_info->fixdiv.div;
 	else if (clk_hw_can_set_rate_parent(hw))
@@ -549,7 +603,8 @@ ingenic_clk_set_rate(struct clk_hw *hw, unsigned long req_rate,
 	int ret = 0;
 
 	if (clk_info->type & CGU_CLK_DIV) {
-		div = ingenic_clk_calc_div(hw, clk_info, parent_rate, req_rate);
+		div = ingenic_clk_calc_div(clk_info, ingenic_clk_get_parent(hw),
+					   parent_rate, req_rate);
 		rate = DIV_ROUND_UP(parent_rate, div);
 
 		if (rate != req_rate)
