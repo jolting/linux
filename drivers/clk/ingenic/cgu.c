@@ -83,7 +83,7 @@ ingenic_pll_recalc_rate(struct clk_hw *hw, unsigned long parent_rate)
 	const struct ingenic_cgu_clk_info *clk_info = to_clk_info(ingenic_clk);
 	struct ingenic_cgu *cgu = ingenic_clk->cgu;
 	const struct ingenic_cgu_pll_info *pll_info;
-	unsigned m, n, od, od_enc = 0;
+	unsigned int m, n, od, od2 = 1, od_enc = 0;
 	bool bypass;
 	u32 ctl;
 
@@ -100,6 +100,11 @@ ingenic_pll_recalc_rate(struct clk_hw *hw, unsigned long parent_rate)
 	if (pll_info->od_bits > 0) {
 		od_enc = ctl >> pll_info->od_shift;
 		od_enc &= GENMASK(pll_info->od_bits - 1, 0);
+	}
+
+	if (pll_info->od2_bits > 0) {
+		od2 = ctl >> pll_info->od2_shift;
+		od2 &= GENMASK(pll_info->od2_bits - 1, 0);
 	}
 
 	if (pll_info->bypass_bit >= 0) {
@@ -122,8 +127,12 @@ ingenic_pll_recalc_rate(struct clk_hw *hw, unsigned long parent_rate)
 		BUG_ON(od == pll_info->od_max);
 	od++;
 
+	/* A second post-VCO divider of 0 is not a valid setting */
+	if (!od2)
+		return 0;
+
 	return div_u64((u64)parent_rate * m * pll_info->rate_multiplier,
-		n * od);
+		n * od * od2);
 }
 
 static void
@@ -230,6 +239,11 @@ ingenic_pll_set_rate(struct clk_hw *hw, unsigned long req_rate,
 	if (pll_info->od_bits > 0) {
 		ctl &= ~(GENMASK(pll_info->od_bits - 1, 0) << pll_info->od_shift);
 		ctl |= pll_info->od_encoding[od - 1] << pll_info->od_shift;
+	}
+
+	if (pll_info->od2_bits > 0) {
+		ctl &= ~(GENMASK(pll_info->od2_bits - 1, 0) << pll_info->od2_shift);
+		ctl |= 1 << pll_info->od2_shift;
 	}
 
 	writel(ctl, cgu->base + pll_info->reg);
