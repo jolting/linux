@@ -52,6 +52,8 @@ properties:
           - edt,etml0700z8dha
           # EDT ETML0700Z9NDHA 7.0" WSVGA (1024x600) color TFT LCD LVDS panel
           - edt,etml0700z9ndha
+          # Flashforge Adventurer 5X 7" WVGA (800x480) TFT LCD LVDS panel
+          - flashforge,ad5x-panel
           # HannStar Display Corp. HSD101PWW2 10.1" WXGA (1280x800) LVDS panel
           - hannstar,hsd101pww2
           # Hydis Technologies 7" WXGA (800x1280) TFT LCD LVDS panel
