@@ -27,6 +27,38 @@
 		      <0x30000000 0x10000000>;
 	};
 
+	backlight: backlight {
+		compatible = "gpio-backlight";
+		gpios = <&gpc 14 GPIO_ACTIVE_HIGH>;
+	};
+
+	panel {
+		compatible = "flashforge,ad5x-panel", "panel-lvds";
+		backlight = <&backlight>;
+
+		data-mapping = "vesa-24";
+		width-mm = <108>;
+		height-mm = <64>;
+
+		panel-timing {
+			clock-frequency = <31000000>;
+			hactive = <800>;
+			vactive = <480>;
+			hfront-porch = <40>;
+			hback-porch = <88>;
+			hsync-len = <48>;
+			vfront-porch = <13>;
+			vback-porch = <35>;
+			vsync-len = <3>;
+		};
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&dpu_out>;
+			};
+		};
+	};
+
 	reserved-memory {
 		#address-cells = <1>;
 		#size-cells = <1>;
@@ -64,6 +96,31 @@
 		regulator-always-on;
 		vin-supply = <&vcc_3v3>;
 	};
+};
+
+&dpu {
+	/*
+	 * The panel's 31 MHz pixel clock from the EPLL at 434 MHz, as the
+	 * stock firmware sets it: nothing else may have set it up yet
+	 */
+	assigned-clocks = <&cgu X2600_CLK_EPLL>, <&cgu X2600_CLK_LCD>;
+	assigned-clock-parents = <0>, <&cgu X2600_CLK_EPLL>;
+	assigned-clock-rates = <434000000>, <31000000>;
+
+	phys = <&dsi_dphy>;
+	phy-names = "lvds";
+
+	status = "okay";
+
+	port {
+		dpu_out: endpoint {
+			remote-endpoint = <&panel_in>;
+		};
+	};
+};
+
+&dsi_dphy {
+	status = "okay";
 };
 
 &exclk {
@@ -118,6 +175,7 @@
 };
 
 &pinctrl {
+
 	pins_mac: mac {
 		function = "mac0";
 		groups = "mac0-rmii";
