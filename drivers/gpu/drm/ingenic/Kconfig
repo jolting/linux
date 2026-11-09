@@ -38,3 +38,23 @@ config DRM_INGENIC_DW_HDMI
 	  select this option.
 
 endif
+
+config DRM_INGENIC_DPU
+	tristate "DRM support for the Ingenic X2600 display processing unit"
+	depends on DRM && OF && COMMON_CLK
+	depends on MACH_INGENIC || COMPILE_TEST
+	select DRM_BRIDGE
+	select DRM_BRIDGE_CONNECTOR
+	select DRM_CLIENT_SELECTION
+	select DRM_DISPLAY_HELPER
+	select DRM_GEM_DMA_HELPER
+	select DRM_KMS_HELPER
+	select DRM_PANEL_BRIDGE
+	help
+	  Choose this option for the display processing unit (DPU) of the
+	  Ingenic X2600, which drives parallel TFT panels, and LVDS panels
+	  through the SoC's LVDS PHY. The driver shows one framebuffer
+	  through the DPU's simple read channel; the composer and the
+	  rotator are not used.
+
+	  If M is selected the module will be called ingenic-dpu.
