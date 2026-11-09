@@ -275,6 +275,19 @@
 		};
 	};
 
+	dpu: display-controller@13050000 {
+		compatible = "ingenic,x2600-dpu";
+		reg = <0x13050000 0x10000>;
+
+		interrupt-parent = <&intc>;
+		interrupts = <31>;
+
+		clocks = <&cgu X2600_CLK_LCD>;
+		clock-names = "lcd";
+
+		status = "disabled";
+	};
+
 	pdma: dma-controller@13420000 {
 		compatible = "ingenic,x2600-dma", "ingenic,x1830-dma";
 		reg = <0x13420000 0x400>, <0x13421000 0x40>;
@@ -368,6 +381,19 @@
 
 		phys = <&usb_phy>;
 		phy-names = "usb2-phy";
+
+		status = "disabled";
+	};
+
+	/* The Innosilicon PHY's registers start 0x400 into the MIPI TX PHY block */
+	dsi_dphy: phy@10024400 {
+		compatible = "ingenic,x2600-dsi-dphy";
+		reg = <0x10024400 0x400>;
+
+		clocks = <&exclk>, <&cgu X2600_CLK_DSI>;
+		clock-names = "ref", "pclk";
+
+		#phy-cells = <0>;
 
 		status = "disabled";
 	};
