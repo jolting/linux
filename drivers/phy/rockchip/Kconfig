@@ -59,12 +59,12 @@ config PHY_ROCKCHIP_INNO_CSIDPHY
 
 config PHY_ROCKCHIP_INNO_DSIDPHY
 	tristate "Rockchip Innosilicon MIPI/LVDS/TTL PHY driver"
-	depends on (ARCH_ROCKCHIP || COMPILE_TEST) && OF
+	depends on (ARCH_ROCKCHIP || MACH_INGENIC || COMPILE_TEST) && OF
 	select GENERIC_PHY
 	select GENERIC_PHY_MIPI_DPHY
 	help
-	  Enable this to support the Rockchip MIPI/LVDS/TTL PHY with
-	  Innosilicon IP block.
+	  Enable this to support the MIPI/LVDS/TTL PHY with Innosilicon IP
+	  block of Rockchip SoCs and of the Ingenic X2600.
 
 config PHY_ROCKCHIP_NANENG_COMBO_PHY
 	tristate "Rockchip NANENG COMBO PHY Driver"
