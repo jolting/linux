@@ -14,12 +14,14 @@ description:
 
 properties:
   compatible:
-    enum:
-      - ingenic,jz4775-mac
-      - ingenic,x1000-mac
-      - ingenic,x1600-mac
-      - ingenic,x1830-mac
-      - ingenic,x2000-mac
+    items:
+      - enum:
+          - ingenic,jz4775-mac
+          - ingenic,x1000-mac
+          - ingenic,x1600-mac
+          - ingenic,x1830-mac
+          - ingenic,x2000-mac
+      - const: snps,dwmac
 
   reg:
     maxItems: 1
@@ -55,14 +57,17 @@ required:
   - clock-names
   - mode-reg
 
-additionalProperties: false
+allOf:
+  - $ref: snps,dwmac.yaml#
+
+unevaluatedProperties: false
 
 examples:
   - |
     #include <dt-bindings/clock/ingenic,x1000-cgu.h>
 
     mac: ethernet@134b0000 {
-        compatible = "ingenic,x1000-mac";
+        compatible = "ingenic,x1000-mac", "snps,dwmac";
         reg = <0x134b0000 0x2000>;
 
         interrupt-parent = <&intc>;
@@ -73,5 +78,7 @@ examples:
         clock-names = "stmmaceth";
 
         mode-reg = <&mac_phy_ctrl>;
+
+        phy-mode = "rmii";
     };
 ...
