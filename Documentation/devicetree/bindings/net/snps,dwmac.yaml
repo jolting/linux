@@ -67,6 +67,7 @@ properties:
         - ingenic,x1600-mac
         - ingenic,x1830-mac
         - ingenic,x2000-mac
+        - ingenic,x2600-mac
         - loongson,ls2k-dwmac
         - loongson,ls7a-dwmac
         - nuvoton,ma35d1-dwmac
@@ -629,6 +630,7 @@ allOf:
                 - ingenic,x1600-mac
                 - ingenic,x1830-mac
                 - ingenic,x2000-mac
+                - ingenic,x2600-mac
                 - qcom,qcs404-ethqos
                 - qcom,sa8775p-ethqos
                 - qcom,sc8280xp-ethqos

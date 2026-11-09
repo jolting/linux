@@ -14,14 +14,19 @@ description:
 
 properties:
   compatible:
-    items:
-      - enum:
-          - ingenic,jz4775-mac
-          - ingenic,x1000-mac
-          - ingenic,x1600-mac
-          - ingenic,x1830-mac
-          - ingenic,x2000-mac
-      - const: snps,dwmac
+    oneOf:
+      - items:
+          - enum:
+              - ingenic,jz4775-mac
+              - ingenic,x1000-mac
+              - ingenic,x1600-mac
+              - ingenic,x1830-mac
+              - ingenic,x2000-mac
+          - const: snps,dwmac
+      - items:
+          - const: ingenic,x2600-mac
+          - const: ingenic,x1000-mac
+          - const: snps,dwmac
 
   reg:
     maxItems: 1
