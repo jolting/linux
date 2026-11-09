@@ -12,5 +12,6 @@ obj-$(CONFIG_YAMON_DT_SHIM)		+= yamon-dt.o
 obj-$(CONFIG_LEGACY_BOARD_SEAD3)	+= board-sead3.o
 obj-$(CONFIG_LEGACY_BOARD_OCELOT)	+= board-ocelot.o
 obj-$(CONFIG_MACH_INGENIC)			+= board-ingenic.o
+obj-$(CONFIG_INGENIC_SMP)		+= smp-ingenic.o smp-ingenic-entry.o
 obj-$(CONFIG_VIRT_BOARD_RANCHU)		+= board-ranchu.o
 obj-$(CONFIG_MACH_REALTEK_RTL)		+= board-realtek.o

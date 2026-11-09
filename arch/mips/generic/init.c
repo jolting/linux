@@ -117,6 +117,8 @@ void __init device_tree_init(void)
 		return;
 	if (!register_vsmp_smp_ops())
 		return;
+	if (!register_ingenic_smp_ops())
+		return;
 
 	register_up_smp_ops();
 }

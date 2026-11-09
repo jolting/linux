@@ -95,6 +95,19 @@ static inline int register_vsmp_smp_ops(void)
 #endif
 }
 
+#ifdef CONFIG_INGENIC_SMP
+
+int register_ingenic_smp_ops(void);
+
+#else /* !CONFIG_INGENIC_SMP */
+
+static inline int register_ingenic_smp_ops(void)
+{
+	return -ENODEV;
+}
+
+#endif /* !CONFIG_INGENIC_SMP */
+
 #ifdef CONFIG_MIPS_CPS
 extern int register_cps_smp_ops(void);
 #else
