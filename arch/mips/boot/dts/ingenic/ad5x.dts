@@ -43,6 +43,26 @@
 			no-map;
 		};
 	};
+
+	vcc_3v3: regulator-3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc-3v3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+	};
+
+	/* The RTL8821CU Wi-Fi module, behind the USB hub */
+	regulator-wifi {
+		compatible = "regulator-fixed";
+		regulator-name = "wifi-power";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpb 7 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-always-on;
+		vin-supply = <&vcc_3v3>;
+	};
 };
 
 &exclk {
@@ -59,6 +79,20 @@
 	non-removable;
 	no-sd;
 	no-sdio;
+
+	status = "okay";
+};
+
+/* OTG port: not on the display's USB ports; set up as the stock firmware does */
+&otg {
+	dr_mode = "otg";
+
+	status = "okay";
+};
+
+&otg_phy {
+	vcc-supply = <&vcc_3v3>;
+	ingenic,external-vbus-detect;
 
 	status = "okay";
 };
@@ -127,6 +161,20 @@
 &uart5 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pins_uart5>;
+
+	status = "okay";
+};
+
+/* Host port: an internal USB hub with the camera and the Wi-Fi module */
+&usb {
+	dr_mode = "host";
+	disable-over-current;
+
+	status = "okay";
+};
+
+&usb_phy {
+	vcc-supply = <&vcc_3v3>;
 
 	status = "okay";
 };
