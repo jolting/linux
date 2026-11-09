@@ -1862,8 +1862,10 @@ config JZ4740_WDT
 	depends on COMMON_CLK
 	select WATCHDOG_CORE
 	select MFD_SYSCON
+	select REGMAP_MMIO
 	help
-	  Hardware driver for the built-in watchdog timer on Ingenic jz4740 SoCs.
+	  Hardware driver for the built-in watchdog timer on Ingenic jz4740
+	  and later SoCs, X2600 included. It also restarts the system.
 
 config WDT_MTX1
 	tristate "MTX-1 Hardware Watchdog"
