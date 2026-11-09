@@ -14,6 +14,7 @@
 		serial2 = &uart2;
 		serial4 = &uart4;
 		serial5 = &uart5;
+		serial7 = &uart7;
 	};
 
 	chosen {
@@ -146,6 +147,11 @@
 		function = "uart5";
 		groups = "uart5-data-b";
 	};
+
+	pins_uart7: uart7 {
+		function = "uart7";
+		groups = "uart7-data-c";
+	};
 };
 
 /* Debug console */
@@ -185,6 +191,14 @@
 &uart5 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pins_uart5>;
+
+	status = "okay";
+};
+
+/* Bed weighing board */
+&uart7 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pins_uart7>;
 
 	status = "okay";
 };
