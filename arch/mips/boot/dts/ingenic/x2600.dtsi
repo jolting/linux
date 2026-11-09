@@ -102,6 +102,11 @@
 
 			status = "disabled";
 		};
+
+		mac_phy_ctrl: mac-phy-ctrl@e4 {
+			compatible = "ingenic,x2600-mac-phy-ctrl", "syscon";
+			reg = <0xe4 0x4>;
+		};
 	};
 
 	ost: timer@12000000 {
@@ -237,6 +242,30 @@
 		clock-names = "core";
 
 		status = "disabled";
+	};
+
+	mac: ethernet@134b0000 {
+		compatible = "ingenic,x2600-mac", "ingenic,x1000-mac", "snps,dwmac";
+		reg = <0x134b0000 0x2000>;
+
+		interrupt-parent = <&intc>;
+		interrupts = <55>;
+		interrupt-names = "macirq";
+
+		clocks = <&cgu X2600_CLK_GMAC>;
+		clock-names = "stmmaceth";
+
+		mode-reg = <&mac_phy_ctrl>;
+
+		status = "disabled";
+
+		mdio: mdio {
+			compatible = "snps,dwmac-mdio";
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			status = "disabled";
+		};
 	};
 
 	otg: usb@13500000 {
