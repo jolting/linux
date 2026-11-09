@@ -92,6 +92,7 @@ struct ingenic_usb_phy {
 
 	struct phy *phy;
 	void __iomem *base;
+	void __iomem *pcr1;
 	struct clk *clk;
 	struct regulator *vcc_supply;
 };
@@ -222,9 +223,8 @@ static void jz4775_usb_phy_init(struct phy *phy)
 	struct ingenic_usb_phy *priv = phy_get_drvdata(phy);
 	u32 reg;
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_USB_SEL |
-		USBPCR1_WORD_IF_16BIT;
-	writel(reg, priv->base + REG_USBPCR1_OFFSET);
+	reg = readl(priv->pcr1) | USBPCR1_USB_SEL | USBPCR1_WORD_IF_16BIT;
+	writel(reg, priv->pcr1);
 
 	reg = USBPCR_COMMONONN | USBPCR_POR |
 		FIELD_PREP(USBPCR_TXVREFTUNE_MASK, USBPCR_TXVREFTUNE_INC_75PPT);
@@ -236,9 +236,8 @@ static void jz4780_usb_phy_init(struct phy *phy)
 	struct ingenic_usb_phy *priv = phy_get_drvdata(phy);
 	u32 reg;
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_USB_SEL |
-		USBPCR1_WORD_IF_16BIT;
-	writel(reg, priv->base + REG_USBPCR1_OFFSET);
+	reg = readl(priv->pcr1) | USBPCR1_USB_SEL | USBPCR1_WORD_IF_16BIT;
+	writel(reg, priv->pcr1);
 
 	reg = USBPCR_TXPREEMPHTUNE | USBPCR_COMMONONN | USBPCR_POR;
 	writel(reg, priv->base + REG_USBPCR_OFFSET);
@@ -249,8 +248,8 @@ static void x1000_usb_phy_init(struct phy *phy)
 	struct ingenic_usb_phy *priv = phy_get_drvdata(phy);
 	u32 reg;
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_WORD_IF_16BIT;
-	writel(reg, priv->base + REG_USBPCR1_OFFSET);
+	reg = readl(priv->pcr1) | USBPCR1_WORD_IF_16BIT;
+	writel(reg, priv->pcr1);
 
 	reg = USBPCR_TXPREEMPHTUNE | USBPCR_COMMONONN | USBPCR_POR |
 		FIELD_PREP(USBPCR_SQRXTUNE_MASK, USBPCR_SQRXTUNE_DCR_20PCT) |
@@ -267,9 +266,8 @@ static void x1830_usb_phy_init(struct phy *phy)
 	/* rdt */
 	writel(USBRDT_VBFIL_EN | USBRDT_UTMI_RST, priv->base + REG_USBRDT_OFFSET);
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_WORD_IF_16BIT |
-		USBPCR1_DMPD | USBPCR1_DPPD;
-	writel(reg, priv->base + REG_USBPCR1_OFFSET);
+	reg = readl(priv->pcr1) | USBPCR1_WORD_IF_16BIT | USBPCR1_DMPD | USBPCR1_DPPD;
+	writel(reg, priv->pcr1);
 
 	reg = USBPCR_VBUSVLDEXT | USBPCR_TXPREEMPHTUNE | USBPCR_COMMONONN | USBPCR_POR |
 		FIELD_PREP(USBPCR_IDPULLUP_MASK, USBPCR_IDPULLUP_OTG);
@@ -281,8 +279,8 @@ static void x2000_usb_phy_init(struct phy *phy)
 	struct ingenic_usb_phy *priv = phy_get_drvdata(phy);
 	u32 reg;
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_DPPD | USBPCR1_DMPD;
-	writel(reg & ~USBPCR1_PORT_RST, priv->base + REG_USBPCR1_OFFSET);
+	reg = readl(priv->pcr1) | USBPCR1_DPPD | USBPCR1_DMPD;
+	writel(reg & ~USBPCR1_PORT_RST, priv->pcr1);
 
 	reg = USBPCR_POR | FIELD_PREP(USBPCR_IDPULLUP_MASK, USBPCR_IDPULLUP_OTG);
 	writel(reg, priv->base + REG_USBPCR_OFFSET);
@@ -334,6 +332,7 @@ static int ingenic_usb_phy_probe(struct platform_device *pdev)
 		dev_err(dev, "Failed to map registers\n");
 		return PTR_ERR(priv->base);
 	}
+	priv->pcr1 = priv->base + REG_USBPCR1_OFFSET;
 
 	priv->clk = devm_clk_get(dev, NULL);
 	if (IS_ERR(priv->clk)) {
