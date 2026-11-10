@@ -86,11 +86,13 @@ static u32 rtw_usb_read(struct rtw_dev *rtwdev, u32 addr, u16 len)
 	spin_unlock_irqrestore(&rtwusb->usb_lock, flags);
 
 	data = &rtwusb->usb_data[idx];
+	/* What a failed or short read leaves: not an earlier read's value */
+	*data = 0;
 
 	ret = usb_control_msg(udev, usb_rcvctrlpipe(udev, 0),
 			      RTW_USB_CMD_REQ, RTW_USB_CMD_READ, addr,
 			      RTW_USB_VENQT_CMD_IDX, data, len, 1000);
-	if (ret < 0 && ret != -ENODEV && count++ < 4)
+	if (ret != len && ret != -ENODEV && count++ < 4)
 		rtw_err(rtwdev, "read register 0x%x failed with %d\n",
 			addr, ret);
 
