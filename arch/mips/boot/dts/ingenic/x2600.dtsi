@@ -275,6 +275,20 @@
 		};
 	};
 
+	pwm: pwm@13610000 {
+		compatible = "ingenic,x2600-pwm";
+		reg = <0x13610000 0x1000>;
+
+		interrupt-parent = <&intc>;
+		interrupts = <20>;
+
+		clocks = <&cgu X2600_CLK_PWM>;
+
+		#pwm-cells = <3>;
+
+		status = "disabled";
+	};
+
 	watchdog: watchdog@13630000 {
 		compatible = "ingenic,x2600-watchdog";
 		reg = <0x13630000 0x40>;
