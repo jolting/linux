@@ -336,6 +336,18 @@ config PWM_IMX_TPM
 	  To compile this driver as a module, choose M here: the module
 	  will be called pwm-imx-tpm.
 
+config PWM_INGENIC_X2600
+	tristate "Ingenic X2600 PWM support"
+	depends on MACH_INGENIC || COMPILE_TEST
+	depends on COMMON_CLK && OF
+	select REGMAP_MMIO
+	help
+	  Generic PWM framework driver for the PWM controller of the Ingenic
+	  X2600, a block of 16 channels apart from the TCU.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called pwm-ingenic-x2600.
+
 config PWM_INTEL_LGM
 	tristate "Intel LGM PWM support"
 	depends on HAS_IOMEM
