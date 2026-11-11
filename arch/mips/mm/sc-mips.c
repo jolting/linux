@@ -21,6 +21,12 @@
  * MIPS32/MIPS64 L2 cache handling
  */
 
+static inline void mips_sc_hit_cacheop_war(void)
+{
+	if (IS_ENABLED(CONFIG_WAR_INGENIC_L2_HIT_CACHEOP))
+		__fast_iob();
+}
+
 /*
  * Writeback and invalidate the secondary cache before DMA.
  */
@@ -37,6 +43,7 @@ static void mips_sc_inv(unsigned long addr, unsigned long size)
 	unsigned long lsize = cpu_scache_line_size();
 	unsigned long almask = ~(lsize - 1);
 
+	mips_sc_hit_cacheop_war();
 	cache_op(Hit_Writeback_Inv_SD, addr & almask);
 	cache_op(Hit_Writeback_Inv_SD, (addr + size - 1) & almask);
 	blast_inv_scache_range(addr, addr + size);
