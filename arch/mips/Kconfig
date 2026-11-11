@@ -131,6 +131,7 @@ config MACH_INGENIC
 	select USE_OF
 	select CPU_SUPPORTS_CPUFREQ
 	select MIPS_EXTERNAL_TIMER
+	select WAR_INGENIC_L2_HIT_CACHEOP
 
 menu "Machine selection"
 
@@ -2522,6 +2523,14 @@ config WAR_R4600_V1_HIT_CACHEOP
 # (Revision 2.0 device errata from IDT available on https://www.idt.com/
 # in .pdf format.)
 config WAR_R4600_V2_HIT_CACHEOP
+	bool
+
+# Ingenic XBurst II: with the L2-to-DDR prefetcher enabled, invalidating
+# the L2 with Hit CACHE operations can leave stale data there, so that a
+# buffer read after DMA returns what it held before the transfer.  A load
+# from an uncached address before the operations avoids it.  Only XBurst II
+# CPUs run it: XBurst1 shares the platform code but not the prefetcher.
+config WAR_INGENIC_L2_HIT_CACHEOP
 	bool
 
 # From TX49/H2 manual: "If the instruction (i.e. CACHE) is issued for
