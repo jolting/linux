@@ -132,7 +132,6 @@ struct jz4780_dma_chan {
 	struct dma_pool *desc_pool;
 
 	u32 transfer_type_tx, transfer_type_rx;
-	u32 transfer_shift;
 	struct dma_slave_config	config;
 
 	struct jz4780_dma_desc *desc;
@@ -338,7 +337,6 @@ static int jz4780_dma_setup_hwdesc(struct jz4780_dma_chan *jzchan,
 	 */
 	tsz = jz4780_dma_transfer_size(jzchan, addr | len | (width * maxburst),
 				       &shift);
-	jzchan->transfer_shift = shift;
 
 	switch (width) {
 	case DMA_SLAVE_BUSWIDTH_1_BYTE:
@@ -469,7 +467,6 @@ static struct dma_async_tx_descriptor *jz4780_dma_prep_dma_memcpy(
 		return NULL;
 
 	tsz = jz4780_dma_transfer_size(jzchan, dest | src | len, &shift);
-	jzchan->transfer_shift = shift;
 
 	desc->transfer_type = JZ_DMA_DRT_AUTO;
 
@@ -622,21 +619,44 @@ static int jz4780_dma_config(struct dma_chan *chan,
 	return 0;
 }
 
+/* log2 of the bytes per transfer unit that a descriptor's TSZ field selects */
+static unsigned int jz4780_dma_hwdesc_shift(const struct jz4780_dma_hwdesc *hwdesc)
+{
+	switch ((hwdesc->dcm & JZ_DMA_DCM_TSZ_MASK) >> JZ_DMA_DCM_TSZ_SHIFT) {
+	case JZ_DMA_SIZE_1_BYTE:
+		return 0;
+	case JZ_DMA_SIZE_2_BYTE:
+		return 1;
+	case JZ_DMA_SIZE_4_BYTE:
+		return 2;
+	case JZ_DMA_SIZE_16_BYTE:
+		return 4;
+	case JZ_DMA_SIZE_32_BYTE:
+		return 5;
+	case JZ_DMA_SIZE_64_BYTE:
+		return 6;
+	default:
+		return 7;
+	}
+}
+
 static size_t jz4780_dma_desc_residue(struct jz4780_dma_chan *jzchan,
 	struct jz4780_dma_desc *desc, unsigned int next_sg)
 {
 	struct jz4780_dma_dev *jzdma = jz4780_dma_chan_parent(jzchan);
-	unsigned int count = 0;
+	size_t residue = 0;
 	unsigned int i;
 
 	for (i = next_sg; i < desc->count; i++)
-		count += desc->desc[i].dtc & GENMASK(23, 0);
+		residue += (size_t)(desc->desc[i].dtc & GENMASK(23, 0)) <<
+			   jz4780_dma_hwdesc_shift(&desc->desc[i]);
 
 	if (next_sg != 0)
-		count += jz4780_dma_chn_readl(jzdma, jzchan->id,
-					 JZ_DMA_REG_DTC);
+		residue += (size_t)jz4780_dma_chn_readl(jzdma, jzchan->id,
+							JZ_DMA_REG_DTC) <<
+			   jz4780_dma_hwdesc_shift(&desc->desc[next_sg - 1]);
 
-	return count << jzchan->transfer_shift;
+	return residue;
 }
 
 static enum dma_status jz4780_dma_tx_status(struct dma_chan *chan,
