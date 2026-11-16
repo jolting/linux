@@ -84,6 +84,13 @@ SECTIONS
 		__stop___dbe_table = .;
 	}
 
+	/* Exception returns to turn into eretnc where the CPU has it */
+	__eretnc_table : {
+		__start___eretnc_table = .;
+		KEEP(*(__eretnc_table))
+		__stop___eretnc_table = .;
+	}
+
 	_sdata = .;			/* Start of data section */
 	RO_DATA(4096)
 

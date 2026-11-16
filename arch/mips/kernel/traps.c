@@ -2230,6 +2230,52 @@ static void configure_exception_vector(void)
 	}
 }
 
+/* Release 5 kernels, not microMIPS: its eret and eretnc differ */
+#if defined(CONFIG_CPU_MIPSR5) && !defined(CONFIG_CPU_MICROMIPS)
+#define MIPS_INSN_ERET		0x42000018
+#define MIPS_INSN_ERETNC	0x42000058
+
+extern unsigned long __start___eretnc_table[], __stop___eretnc_table[];
+static bool eretnc_in_use;
+
+static void eretnc_patch(u32 insn)
+{
+	unsigned long *p;
+
+	for (p = __start___eretnc_table; p < __stop___eretnc_table; p++) {
+		u32 *site = (u32 *)*p;
+
+		*site = insn;
+		local_flush_icache_range((unsigned long)site,
+					 (unsigned long)(site + 1));
+	}
+}
+
+/*
+ * eretnc, which returns from an exception without clearing the LL bit,
+ * comes with Config5.LLB, which not every Release 5 CPU has: Ingenic's
+ * XBurst II, for one, takes a Reserved Instruction exception on it. The
+ * kernel is built with eret; use eretnc where the boot CPU reports LLB,
+ * and go back to eret if a later CPU does not (eret is always valid).
+ */
+static void eretnc_setup(bool is_boot_cpu)
+{
+	if (is_boot_cpu) {
+		if (cpu_has_rw_llb) {
+			eretnc_patch(MIPS_INSN_ERETNC);
+			eretnc_in_use = true;
+		}
+	} else if (eretnc_in_use && !cpu_has_rw_llb) {
+		eretnc_patch(MIPS_INSN_ERET);
+		eretnc_in_use = false;
+		pr_warn("CPU%d has no Config5.LLB: eret for exception returns\n",
+			smp_processor_id());
+	}
+}
+#else
+static inline void eretnc_setup(bool is_boot_cpu) { }
+#endif
+
 void per_cpu_trap_init(bool is_boot_cpu)
 {
 	unsigned int cpu = smp_processor_id();
@@ -2274,6 +2320,7 @@ void per_cpu_trap_init(bool is_boot_cpu)
 	/* Boot CPU's cache setup in setup_arch(). */
 	if (!is_boot_cpu)
 		cpu_cache_init();
+	eretnc_setup(is_boot_cpu);
 	tlb_init();
 	TLBMISS_HANDLER_SETUP();
 }

@@ -427,13 +427,20 @@
 
 		.macro	RESTORE_SP_AND_RET docfi=0
 		RESTORE_SP \docfi
-#if defined(CONFIG_CPU_MIPSR5) || defined(CONFIG_CPU_MIPSR6)
+#ifdef CONFIG_CPU_MIPSR6
 		eretnc
 #else
 		.set	push
 		.set	arch=r4000
-		eret
+771:		eret
 		.set	pop
+#if defined(CONFIG_CPU_MIPSR5) && !defined(CONFIG_CPU_MICROMIPS)
+		/* eretnc on CPUs with Config5.LLB, see eretnc_setup() */
+		.pushsection __eretnc_table, "a"
+		.align	PTRLOG
+		PTR_WD	771b
+		.popsection
+#endif
 #endif
 		.endm
 
