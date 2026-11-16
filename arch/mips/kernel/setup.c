@@ -33,6 +33,7 @@
 #include <linux/crash_dump.h>
 #include <linux/string.h>
 
+#include <asm/alternative.h>
 #include <asm/addrspace.h>
 #include <asm/bootinfo.h>
 #include <asm/bugs.h>
@@ -830,4 +831,7 @@ void __init arch_cpu_finalize_init(void)
 
 	if (IS_ENABLED(CONFIG_CPU_R4X00_BUGS64))
 		check_bugs64();
+
+	if (!IS_ENABLED(CONFIG_SMP))
+		apply_alternatives_all();
 }

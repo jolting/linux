@@ -41,6 +41,7 @@
 #include <linux/string_choices.h>
 
 #include <asm/addrspace.h>
+#include <asm/alternative.h>
 #include <asm/bootinfo.h>
 #include <asm/branch.h>
 #include <asm/break.h>
@@ -2272,8 +2273,10 @@ void per_cpu_trap_init(bool is_boot_cpu)
 	enter_lazy_tlb(&init_mm, current);
 
 	/* Boot CPU's cache setup in setup_arch(). */
-	if (!is_boot_cpu)
+	if (!is_boot_cpu) {
 		cpu_cache_init();
+		verify_local_cpu_alternatives();
+	}
 	tlb_init();
 	TLBMISS_HANDLER_SETUP();
 }

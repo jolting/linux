@@ -8,7 +8,7 @@ always-$(KBUILD_BUILTIN)	:= vmlinux.lds
 obj-y		+= head.o branch.o cmpxchg.o elf.o entry.o genex.o idle.o irq.o \
 		   process.o prom.o ptrace.o reset.o setup.o signal.o \
 		   syscall.o time.o topology.o traps.o unaligned.o watch.o \
-		   vdso.o cacheinfo.o
+		   vdso.o cacheinfo.o alternative.o
 
 ifdef CONFIG_CPU_R3K_TLB
 obj-y		+= cpu-r3k-probe.o

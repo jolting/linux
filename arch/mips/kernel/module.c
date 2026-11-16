@@ -19,6 +19,7 @@
 #include <linux/kernel.h>
 #include <linux/spinlock.h>
 #include <linux/jump_label.h>
+#include <asm/alternative.h>
 #include <asm/jump_label.h>
 
 struct mips_hi16 {
@@ -420,6 +421,10 @@ int module_finalize(const Elf_Ehdr *hdr,
 
 	if (IS_ENABLED(CONFIG_JUMP_LABEL))
 		jump_label_apply_nops(me);
+
+	for (s = sechdrs; s < sechdrs + hdr->e_shnum; s++)
+		if (!strcmp(".altinstructions", secstrings + s->sh_name))
+			apply_alternatives_module((void *)s->sh_addr, s->sh_size);
 
 	INIT_LIST_HEAD(&me->arch.dbe_list);
 	for (s = sechdrs; s < sechdrs + hdr->e_shnum; s++) {

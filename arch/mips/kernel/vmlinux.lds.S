@@ -84,6 +84,13 @@ SECTIONS
 		__stop___dbe_table = .;
 	}
 
+	. = ALIGN(8);
+	.altinstructions : {
+		__alt_instructions = .;
+		*(.altinstructions)
+		__alt_instructions_end = .;
+	}
+
 	_sdata = .;			/* Start of data section */
 	RO_DATA(4096)
 

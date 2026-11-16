@@ -28,6 +28,7 @@
 #include <linux/of_irq.h>
 
 #include <linux/atomic.h>
+#include <asm/alternative.h>
 #include <asm/cpu.h>
 #include <asm/ginvt.h>
 #include <asm/processor.h>
@@ -434,6 +435,7 @@ void smp_send_stop(void)
 
 void __init smp_cpus_done(unsigned int max_cpus)
 {
+	apply_alternatives_all();
 }
 
 /* called from main before smp_init() */
