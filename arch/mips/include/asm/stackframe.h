@@ -14,6 +14,7 @@
 #include <linux/threads.h>
 
 #include <asm/asm.h>
+#include <asm/alternative.h>
 #include <asm/asmmacro.h>
 #include <asm/mipsregs.h>
 #include <asm/asm-offsets.h>
@@ -429,6 +430,8 @@
 		RESTORE_SP \docfi
 #ifdef CONFIG_CPU_MIPSR6
 		eretnc
+#elif defined(CONFIG_CPU_MIPSR5) && !defined(CONFIG_CPU_MICROMIPS)
+		alternative_insn eret, eretnc, MIPS_ALT_RW_LLB
 #else
 		.set	push
 		.set	arch=r4000
